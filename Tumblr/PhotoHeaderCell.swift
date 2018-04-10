@@ -1,18 +1,18 @@
 //
-//  PhotoCell.swift
+//  PhotoHeaderCell.swift
 //  Tumblr
 //
-//  Created by Rui Mao on 4/8/18.
+//  Created by Rui Mao on 4/9/18.
 //  Copyright © 2018 Rui Mao. All rights reserved.
 //
 
 import UIKit
 
-class PhotoCell: UITableViewCell {
+class PhotoHeaderCell: UITableViewCell {
 
-    @IBOutlet weak var photoImageView: UIImageView!
     override func awakeFromNib() {
         super.awakeFromNib()
+        // Initialization code
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
