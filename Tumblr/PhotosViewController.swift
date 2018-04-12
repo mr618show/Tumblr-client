@@ -17,15 +17,14 @@ class PhotosViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+        navigationItem.title = "Tumblr"
         tableView.dataSource = self
         tableView.delegate = self
-        tableView.rowHeight = 320
+        tableView.rowHeight = 330
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(fetchPosts(_:)), for: UIControlEvents.valueChanged)
+        refreshControl.tintColor = .white
         tableView.insertSubview(refreshControl, at: 0)
-
-    
     }
 
     
@@ -83,15 +82,13 @@ class PhotosViewController: UIViewController {
     
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-
         let indexPath = tableView.indexPath(for: sender as! UITableViewCell)!
-        let post = posts[indexPath.row]
+        let post = posts[indexPath.section]
         let photos = post.value(forKey: "photos") as? [NSDictionary]
         let imageUrlString = photos![0].value(forKeyPath: "original_size.url") as? String
         let imageUrl = URL(string: imageUrlString!)
         let detailViewController = segue.destination as! DetailViewController
         detailViewController.imageUrl = imageUrl
-        
     }
 }
 
@@ -125,7 +122,7 @@ extension PhotosViewController: UITableViewDelegate {
         let headerView = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 50))
         headerView.backgroundColor = UIColor(white: 1, alpha: 0.9)
         
-        let profileView = UIImageView(frame: CGRect(x: 10, y: 10, width: 30, height: 30))
+        let profileView = UIImageView(frame: CGRect(x: 10, y: 0, width: 30, height: 30))
         profileView.clipsToBounds = true
         profileView.layer.cornerRadius = 15;
         profileView.layer.borderColor = UIColor(white: 0.7, alpha: 0.8).cgColor
@@ -140,7 +137,7 @@ extension PhotosViewController: UITableViewDelegate {
         dateFormatterGet.dateFormat = "yyyy-MM-dd HH:mm:ss ZZZ"
         let dateFormatterPrint = DateFormatter()
         dateFormatterPrint.dateFormat = "yyyy-MM-dd HH:mm"
-        let label = UILabel(frame: CGRect(x: 50, y: 10, width: 200, height: 30))
+        let label = UILabel(frame: CGRect(x: 50, y: 0, width: 200, height: 30))
         label.textAlignment = .left
         if let date = dateFormatterGet.date(from: dateString) {
             label.text = dateFormatterPrint.string(from: date)
@@ -166,11 +163,6 @@ extension PhotosViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         return 30
     }
-    func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
-        let indexPath = tableView.indexPathForSelectedRow
-        tableView.deselectRow(at: indexPath!, animated: true)
-    }
-    
 }
 
 extension PhotosViewController : UIScrollViewDelegate {

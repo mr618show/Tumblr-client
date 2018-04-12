@@ -16,11 +16,8 @@ class DetailViewController: UIViewController {
     var imageUrl : URL!
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
+        view.backgroundColor = UIColor().HexToColor(hexString: "35465c")
         photoImageView.setImageWith(imageUrl! as URL)
-
-        
     }
 
     override func didReceiveMemoryWarning() {
