@@ -11,7 +11,7 @@ import AFNetworking
 
 class PhotosViewController: UIViewController {
     var posts = [NSDictionary]()
-    var isMoreDataLoading = false
+
     
     @IBOutlet weak var tableView: UITableView!
     
@@ -38,7 +38,6 @@ class PhotosViewController: UIViewController {
             delegateQueue:OperationQueue.main
         )
         let task : URLSessionDataTask = session.dataTask(with: request as URLRequest,completionHandler: { (dataOrNil, response, error) in
-            self.isMoreDataLoading = false
             if let httpError = error {
                 print("\(httpError)")
             } else {
@@ -46,7 +45,9 @@ class PhotosViewController: UIViewController {
                     if let responseDictionary = try! JSONSerialization.jsonObject(with: data, options:[]) as? NSDictionary {
                         let responseFieldDictionary = responseDictionary["response"] as! NSDictionary
                         self.posts = responseFieldDictionary["posts"] as! [NSDictionary]
-                        self.tableView.reloadData()
+                        DispatchQueue.main.async {
+                            self.tableView.reloadData()
+                        }
                         refreshControl.endRefreshing()
                     }
                 }
@@ -54,31 +55,7 @@ class PhotosViewController: UIViewController {
         });
         task.resume()
     }
-    func loadMoreData() {
-        let apikey = "Q6vHoaVm5L1u2ZAW1fqv3Jw48gFzYVg9P0vH0VHl3GVy6quoGV"
-        let url = URL(string:"https://api.tumblr.com/v2/blog/humansofnewyork.tumblr.com/posts/photo?api_key=\(apikey)")
-        let request = URLRequest(url: url!)
-        let session = URLSession(
-            configuration: URLSessionConfiguration.default,
-            delegate: nil,
-            delegateQueue:OperationQueue.main
-        )
-        let task : URLSessionDataTask = session.dataTask(with: request as URLRequest,completionHandler: { (dataOrNil, response, error) in
-            self.isMoreDataLoading = false
-            if let httpError = error {
-                print("\(httpError)")
-            } else {
-                if let data = dataOrNil {
-                    if let responseDictionary = try! JSONSerialization.jsonObject(with: data, options:[]) as? NSDictionary {
-                        let responseFieldDictionary = responseDictionary["response"] as! NSDictionary
-                        self.posts = responseFieldDictionary["posts"] as! [NSDictionary]
-                        self.tableView.reloadData()
-                    }
-                }
-            }
-        });
-        task.resume()
-    }
+    
     
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -121,7 +98,6 @@ extension PhotosViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let headerView = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 50))
         headerView.backgroundColor = UIColor(white: 1, alpha: 0.9)
-        
         let profileView = UIImageView(frame: CGRect(x: 10, y: 0, width: 30, height: 30))
         profileView.clipsToBounds = true
         profileView.layer.cornerRadius = 15;
@@ -165,20 +141,4 @@ extension PhotosViewController: UITableViewDelegate {
     }
 }
 
-extension PhotosViewController : UIScrollViewDelegate {
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        if (!isMoreDataLoading) {
-            // Calculate the position of one screen length before the bottom of the results
-            let scrollViewContentHeight = tableView.contentSize.height
-            let scrollOffsetThreshold = scrollViewContentHeight - tableView.bounds.size.height
-            
-            // When the user has scrolled past the threshold, start requesting
-            if(scrollView.contentOffset.y > scrollOffsetThreshold && tableView.isDragging) {
-                isMoreDataLoading = true
-                loadMoreData()
-            }
-        }
-    }
 
-    
-}
