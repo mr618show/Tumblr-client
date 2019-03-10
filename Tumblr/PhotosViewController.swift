@@ -29,30 +29,35 @@ class PhotosViewController: UIViewController {
 
     
     @objc func fetchPosts(_ refreshControl: UIRefreshControl) {
+        //create a configuration
+        let configuration = URLSessionConfiguration.default
+        //create a session
+        let session = URLSession(configuration: configuration)
+        //Setup the url
         let apikey = "Q6vHoaVm5L1u2ZAW1fqv3Jw48gFzYVg9P0vH0VHl3GVy6quoGV"
         let url = URL(string:"https://api.tumblr.com/v2/blog/humansofnewyork.tumblr.com/posts/photo?api_key=\(apikey)")
-        let request = URLRequest(url: url!)
-        let session = URLSession(
-            configuration: URLSessionConfiguration.default,
-            delegate: nil,
-            delegateQueue:OperationQueue.main
-        )
-        let task : URLSessionDataTask = session.dataTask(with: request as URLRequest,completionHandler: { (dataOrNil, response, error) in
-            if let httpError = error {
-                print("\(httpError)")
-            } else {
-                if let data = dataOrNil {
-                    if let responseDictionary = try! JSONSerialization.jsonObject(with: data, options:[]) as? NSDictionary {
-                        let responseFieldDictionary = responseDictionary["response"] as! NSDictionary
-                        self.posts = responseFieldDictionary["posts"] as! [NSDictionary]
-                        DispatchQueue.main.async {
-                            self.tableView.reloadData()
-                        }
+        //Create the task
+        let task = session.dataTask(with: url!){
+            (data, reponse, error) in
+            guard let httpResponse = reponse as? HTTPURLResponse, httpResponse.statusCode == 200, let data = data else {
+                return
+            }
+            do {
+                if let responseDictionary = try! JSONSerialization.jsonObject(with: data, options:[]) as? NSDictionary {
+                    let responseFieldDictionary = responseDictionary["response"] as! NSDictionary
+                    self.posts = responseFieldDictionary["posts"] as! [NSDictionary]
+                    let queue = OperationQueue.main
+                    queue.addOperation {
+                        self.tableView.reloadData()
                         refreshControl.endRefreshing()
                     }
+//                    DispatchQueue.main.async {
+//          
+//                    }
                 }
             }
-        });
+            
+        }
         task.resume()
     }
     
